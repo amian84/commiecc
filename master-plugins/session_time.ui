@@ -1,0 +1,234 @@
+<?xml version="1.0"?>
+<interface>
+  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-naming-policy project-wide -->
+  <object class="GtkMenu" id="menu2">
+    <property name="visible">True</property>
+    <child>
+      <object class="GtkImageMenuItem" id="session_time_menuitem">
+        <property name="label">Establecer Tiempo de sesi&#xF3;n</property>
+        <property name="visible">True</property>
+        <property name="tooltip_text">Establezca tiempos de sesi&#xF3;n en el cliente seleccionado</property>
+        <property name="image">image1</property>
+        <property name="use_stock">False</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="session_time_menuitem_activate_cb"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="session_time_menuitem2">
+        <property name="label">Eliminar Tiempo de sesi&#xF3;n</property>
+        <property name="visible">True</property>
+        <property name="tooltip_text">Desactive el temporizador de sesi&#xF3;n en el cliente seleccionado</property>
+        <property name="image">image2</property>
+        <property name="use_stock">False</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="session_time_menuitem2_activate_cb"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="icon_name">appointment-new</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="icon_name">appointment-missed</property>
+  </object>
+  <object class="GtkMessageDialog" id="messagedialog1">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">Tiempo de sesi&#xF3;n</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="urgency_hint">True</property>
+    <property name="has_separator">False</property>
+    <property name="buttons">ok-cancel</property>
+    <property name="text">Tiempo de Sesi&#xF3;n</property>
+    <property name="secondary_text">Establezca el tiempo de sesi&#xF3;n para el equipo seleccionado. Al finalizar el tiempo de sesi&#xF3;n, el equipo se bloquear&#xE1; y se cerrar&#xE1; la sesi&#xF3;n autom&#xE1;ticamente.</property>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox2">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkHBox" id="hbox1">
+            <property name="visible">True</property>
+            <property name="homogeneous">True</property>
+            <child>
+              <object class="GtkHPaned" id="hpaned1">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox2">
+                <property name="visible">True</property>
+                <property name="border_width">4</property>
+                <child>
+                  <object class="GtkLabel" id="label1">
+                    <property name="visible">True</property>
+                    <property name="xalign">1</property>
+                    <property name="xpad">1</property>
+                    <property name="label" translatable="yes">Tiempo:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkComboBox" id="combobox1">
+                    <property name="visible">True</property>
+                    <property name="model">liststore1</property>
+                    <property name="active">0</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHPaned" id="hpaned2">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area2">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="liststore1">
+    <columns>
+      <!-- column-name time -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">00:00</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">00:03</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">00:15</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">00:30</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">00:45</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">01:00</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">01:15</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">01:30</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">01:45</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">02:00</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">02:15</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">02:30</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">02:45</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">03:00</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">03:15</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">03:30</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">03:45</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">04:00</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">04:15</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">04:30</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">04:45</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">05:00</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">05:15</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">05:30</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">05:45</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">06:00</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkImage" id="image3">
+    <property name="visible">True</property>
+    <property name="icon_name">appointment-missed</property>
+  </object>
+</interface>

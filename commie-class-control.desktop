@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Control de puestos
+Comment=Herramienta de control de puestos
+Exec=gksudo commie-class-control
+Icon=/usr/share/pixmaps/commiecc.png
+Terminal=false
+Type=Application
+Categories=Application;System;Settings
+Encoding=UTF-8
+StartupNotify=true

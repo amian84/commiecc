@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<interface>
+  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-naming-policy project-wide -->
+  <object class="GtkMenu" id="menu2">
+    <property name="visible">True</property>
+    <child>
+      <object class="GtkImageMenuItem" id="detacher_menuitem">
+        <property name="label">Desacoplar del centro</property>
+        <property name="visible">True</property>
+        <property name="tooltip_text">Desacopla el cliente seleccionado</property>
+        <property name="image">image1</property>
+        <property name="use_stock">False</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="detacher_menuitem_activate_cb"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="pixbuf">detacher.png</property>
+  </object>
+</interface>

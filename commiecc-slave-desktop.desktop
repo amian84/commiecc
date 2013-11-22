@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=CommieCC Slave Desktop
+Comment=Notifies the CommieCC slave-side messages
+Icon=commiecc.png
+Exec=commiecc-slave-desktop
+Terminal=false
+Type=Application

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+chmod 744 /usr/bin/commie-class-control

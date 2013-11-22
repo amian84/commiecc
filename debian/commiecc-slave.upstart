@@ -1,0 +1,20 @@
+# commiecc-slave - Classroom controller slave side
+
+description	"CommieCC slave"
+
+start on (runlevel [235]
+	  and filesystem
+	  and started dbus
+	  and started lightdm
+	  and started console-setup
+	  and started avahi-daemon)
+stop on runlevel [0146]
+
+#expect daemon
+respawn
+
+pre-stop script
+    dbus-send --print-reply --system --dest=org.gnome.CommieCC /org/gnome/CommieCC org.gnome.CommieCC.ScreenLocker.Stop
+end script
+
+exec commiecc-slave

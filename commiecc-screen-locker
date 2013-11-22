@@ -1,0 +1,216 @@
+#!/usr/bin/python2.6
+# -*- coding: utf-8 -*-
+# vim: ts=4 
+###
+#
+# CommieCC is the legal property of J. Félix Ontañón <felixonta@gmail.com>
+# Copyright (c) 2009 J. Félix Ontañón
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3 as
+# published by the Free Software Foundation
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+###
+
+import os
+from optparse import OptionParser
+
+# Launch the locker on the target x11 display
+parser = OptionParser()
+parser.add_option('-d', '--display', dest='display', help='X display to use')
+parser.add_option('-s', '--start-locked', action='store_true', 
+    dest='start_locked', help='Start locked')
+parser.add_option('-l', '--only-lock', action='store_true', dest='only_lock', 
+    help='Send lock signal to running screen lockers')
+    
+(options, args) = parser.parse_args()
+
+if options.display:
+    os.environ['DISPLAY'] = options.display
+
+# Now the locker definition
+from commiecc.conf import DATA_DIR
+UI_FILE = os.path.join(DATA_DIR, 'data/lock_screen.ui')
+
+COMMIECC_URI = "org.gnome.CommieCC"
+COMMIECC_PATH = "/org/gnome/CommieCC"
+LOCKER_IFACE_URI = COMMIECC_URI + '.ScreenLocker'
+
+import gtk
+import gobject
+import dbus
+import dbus.mainloop.glib 
+import platform
+
+from commiecc.slavelib import log, LOG_FILE, SessionControl, pam_auth, CKController
+from commiecc.slavelib.dbusmanager import DBusManager
+
+def only_lock():
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+    bus = dbus.SystemBus()
+    screen_locker_iface = dbus.Interface(bus.get_object(COMMIECC_URI, 
+        COMMIECC_PATH), dbus_interface=LOCKER_IFACE_URI)
+    screen_locker_iface.Lock()
+
+def only_unlock():
+    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+    bus = dbus.SystemBus()
+    screen_locker_iface = dbus.Interface(bus.get_object(COMMIECC_URI, 
+        COMMIECC_PATH), dbus_interface=LOCKER_IFACE_URI)
+    screen_locker_iface.Unlock()
+
+class ScreenLocker:
+    def __init__(self, lock=False):
+        builder = gtk.Builder()
+        if not builder.add_from_file(UI_FILE):
+            raise 'Cant load %s' % UI_FILE
+        builder.connect_signals(self)
+
+        self.main_window = builder.get_object('main_window')
+        self.expander = builder.get_object('details_expander')
+        self.log_buffer = builder.get_object('log_buffer')
+        self.logo_image = builder.get_object('logo_image')
+
+        self.auth_vbox = builder.get_object('auth_vbox')
+        self.username_entry = builder.get_object('username_entry')
+        self.password_entry = builder.get_object('password_entry')
+        self.dialog = builder.get_object('dialog1')
+        self.netstatus_img = builder.get_object('netstatus_img')
+
+        self.unlock_btn = builder.get_object('unlock_btn')
+        self.username_entry.set_text('dinamizador')
+
+        self.hostname_lbl = builder.get_object('hostname_lbl')
+        # Fill the hostname on label
+        self.hostname_lbl.set_text(platform.node())
+
+        # Populates the detail expanded text buffer with slave log
+        def push_buffer(log, f):
+            cont = f.read()
+            log.insert_at_cursor(cont)
+            return True
+
+        f = open(LOG_FILE)
+        cont = f.read()
+        self.log_buffer.insert_at_cursor('\n'.join(cont.split('\n')[-5:]))
+        gobject.timeout_add(1000, push_buffer, self.log_buffer, f)
+
+        # Connect to the Slave locking signal
+        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+        bus = dbus.SystemBus()
+        bus.add_signal_receiver(self.perform_locking, 
+            dbus_interface=LOCKER_IFACE_URI, signal_name="Locked")
+        bus.add_signal_receiver(self.exit, 
+            dbus_interface=LOCKER_IFACE_URI, signal_name="Stoped")
+        bus.add_signal_receiver(self.ping,
+            dbus_interface=LOCKER_IFACE_URI, signal_name="Pinged")
+
+        if lock:
+            self.perform_locking(True)
+            
+    def perform_locking(self, locking):
+        if locking:
+            self.main_window.show()
+            screen = self.main_window.get_screen()
+            self.main_window.resize(screen.get_width(), screen.get_height())
+            gtk.gdk.keyboard_grab(self.main_window.window)
+        else:
+            self.password_entry.set_text('')
+            gtk.gdk.keyboard_ungrab()
+            self.main_window.hide()
+
+#    def unlock_btn_clicked_cb(self, data=None):
+#        #self.dialog.run()
+#        self.auth_vbox.show()
+#        self.username_entry.grab_focus()
+#        #self.perform_locking(False)
+
+    def unlock_btn_clicked_cb(self, data=None):
+        if self.unlock_btn.get_active():
+            self.auth_vbox.show()
+            self.password_entry.grab_focus()
+        else:
+            self.auth_vbox.hide()
+        self.unlock_btn.set_active(self.unlock_btn.get_active())
+
+    def auth_entry_activate_cb(self, widget):
+        username = self.username_entry.get_text()
+        password = self.password_entry.get_text()
+        if pam_auth(username, password):
+            only_unlock()
+    
+    def shutdown_btn_clicked_cb(self, data=None):
+        sess = SessionControl()
+        ck = CKController()
+
+        USER, TIMESTAMP, DISPLAY = range(0,3)
+
+        currentUser = 'Unknown'
+
+        for session in ck.active_sessions:
+            # Not the better way but ... it will work in 90% of times
+            if ck.active_sessions[session][DISPLAY] == ':0':
+                currentUser = ck.active_sessions[session][USER]
+                break
+
+        sess.shutdown(currentUser)
+
+    def exit(self):
+        gtk.main_quit()
+               
+    def ping(self):
+        if self.netstatus_img.get_icon_name()[0] == 'network-transmit':
+            self.netstatus_img.set_from_icon_name('network-receive', 24)
+        else:
+            self.netstatus_img.set_from_icon_name('network-transmit', 24)
+
+
+if __name__ == "__main__":
+    import sys
+    import os
+
+    # If only want to perform locking on current screen lockers
+    if options.only_lock:
+        only_lock()
+        sys.exit(0)
+
+    # Load the screen-locker
+    sc = ScreenLocker(options.start_locked)
+    
+    # Else, daemonize the locker by doing the classic UNIX double-fork magic.
+    try:
+        pid = os.fork()
+        if pid > 0:
+            # exit first parent
+            sys.exit(0)
+    except OSError, e:
+        print >>sys.stderr, "fork #1 failed: %d (%s)" % (e.errno, e.strerror)
+        sys.exit(1)
+
+    # decouple from parent environment
+    os.chdir("/")
+    os.setsid()
+    os.umask(0)
+
+    # do second fork
+    try:
+        pid = os.fork()
+        if pid > 0:
+            # exit from second parent, print eventual PID before
+            # print "Daemon PID %d" % pid
+            sys.exit(0)
+    except OSError, e:
+        print >>sys.stderr, "fork #2 failed: %d (%s)" % (e.errno, e.strerror) 
+        sys.exit(1)
+
+    # Run main loop
+    gtk.main()

@@ -1,0 +1,92 @@
+#!/usr/bin/python2.6
+# -*- coding: utf-8 -*-
+# vim: ts=4 
+###
+#
+# CommieCC is the legal property of J. Félix Ontañón <felixonta@gmail.com>
+# Copyright (c) 2009 J. Félix Ontañón
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3 as
+# published by the Free Software Foundation
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+###
+
+import sys
+import os
+import gtk
+import gobject
+import dbus
+import dbus.mainloop.glib
+
+from commiecc.conf import DATA_DIR
+from commiecc.common import Notificator
+from commiecc.slavelib.dbusmanager import COMMIECC_URI, COMMIECC_PATH, \
+    NOTIFIER_IFACE_URI
+
+DEF_ICON = gtk.STOCK_INFO
+DEF_URGENCY = 1
+DEF_TIMEOUT = 10000
+
+HAL_URI = 'org.freedesktop.Hal'
+HAL_IFACE = HAL_URI + '.Device'
+
+class SlaveStatusIcon(gtk.StatusIcon): 
+    def __init__(self):
+        gtk.StatusIcon.__init__(self)
+
+        self.set_visible(False)
+        self.notificator = Notificator('Commiecc', 'commiecc-slave-desktop')
+
+        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+        bus = dbus.SystemBus()
+
+        try:
+            obj = bus.get_object(COMMIECC_URI, COMMIECC_PATH)
+            obj.connect_to_signal('NotificationSended', self.delivery, 
+                dbus_interface=NOTIFIER_IFACE_URI)
+        except dbus.DBusException, e:
+            print 'Cant init dbus: %s' % e
+            sys.exit(1)
+
+        # Setup status icon
+        self.set_from_file(os.path.join(DATA_DIR,  
+            'data/img/commiecc-c-logo-bg64x64.png')
+            )
+
+        # Connect to power-button-pressed for a clean end of session
+        bus.add_signal_receiver(self.logout_dialog, dbus_interface = HAL_IFACE, signal_name='Condition', message_keyword='message')
+
+    def delivery(self, title, text, icon=DEF_ICON, urgency=DEF_URGENCY):
+        self.set_visible(True)
+        self.set_blinking(True)
+        self.notificator.display_notification(title, text, icon, urgency, 
+            DEF_TIMEOUT)
+
+        def hide_statusicon(status_icon):
+            status_icon.set_visible(False)
+            status_icon.set_blinking(False)
+
+        gobject.timeout_add(DEF_TIMEOUT, hide_statusicon, self)
+
+    def logout_dialog(self, sender = None, arg = None, message = None):
+        
+        try:
+            if str(message.get_args_list()[1]) == "power":
+               os.system('gnome-session-save --logout-dialog')
+        except:
+            pass
+
+
+if __name__ == '__main__':
+    status_icon = SlaveStatusIcon()
+    gtk.main()

@@ -1,0 +1,6 @@
+import os
+import sys
+
+DATA_DIR = os.path.join('/usr', 'share/commiecc/')
+MASTER_DEFAULT_PLUGINS = os.path.join(DATA_DIR, 'master-plugins/')
+SLAVE_DEFAULT_PLUGINS = os.path.join(DATA_DIR, 'slave-plugins/')

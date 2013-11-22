@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<interface>
+  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-naming-policy project-wide -->
+<!--  <object class="GtkMenu" id="menu">
+    <property name="visible">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="hello_menuitem">
+        <property name="label">Hello World</property>
+        <property name="visible">True</property>
+        <property name="use_stock">False</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="hello_menuitem_activate_cb"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="session_menuitem">
+        <property name="label">Current Session</property>
+        <property name="visible">True</property>
+        <property name="image">session_image</property>
+        <property name="use_stock">False</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="session_menuitem_activate_cb"/>
+      </object>
+    </child>
+  </object>
+-->
+
+  <object class="GtkMenu" id="menu1">
+    <property name="visible">True</property>
+<!--
+    <child>
+      <object class="GtkImageMenuItem" id="sayhello_menuitem">
+        <property name="label" translatable="yes">Say hello!</property>
+        <property name="visible">True</property>
+        <property name="tooltip_text" translatable="yes">Say hello to selected slaves</property>
+        <property name="image">image1</property>
+        <property name="use_stock">False</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="sayhello_menuitem_activate_cb"/>
+      </object>
+    </child>
+-->
+    <child>
+      <object class="GtkImageMenuItem" id="message_menuitem">
+        <property name="label" translatable="yes">Custom message</property>
+        <property name="visible">True</property>
+        <property name="tooltip_text" translatable="yes">Send a custom message to selected slaves</property>
+        <property name="image">image2</property>
+        <property name="use_stock">False</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="message_menuitem_activate_cb"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="hello_image">
+    <property name="visible">True</property>
+    <property name="stock">gtk-about</property>
+  </object>
+  <object class="GtkImage" id="session_image">
+    <property name="visible">True</property>
+    <property name="stock">gtk-orientation-portrait</property>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="icon_name">face-smile</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="icon_name">mail-unread</property>
+  </object>
+  <object class="GtkMessageDialog" id="message_dialog">
+    <property name="border_width">5</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon_name">dialog-question</property>
+    <property name="type_hint">dialog</property>
+    <property name="message_type">question</property>
+    <property name="buttons">ok-cancel</property>
+    <property name="text" translatable="yes">Set the message</property>
+    <property name="secondary_text" translatable="yes">What message do you want to send the slaves?</property>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox1">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkEntry" id="message_entry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="is_focus">True</property>
+            <property name="invisible_char">&#x25CF;</property>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area1">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

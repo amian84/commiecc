@@ -1,0 +1,11 @@
+debian/tmp/usr/lib/python*/*/commiecc/masterlib/*.py
+debian/tmp/usr/lib/python*/*/commiecc/classcontrol/*.py
+
+debian/tmp/usr/bin/commie-class-control
+
+debian/tmp/usr/share/commiecc/data/classcontrol.ui
+debian/tmp/usr/share/commiecc/data/img/commiecc-c-logo-bg64x64.png
+debian/tmp/usr/share/applications/commie-class-control.desktop
+debian/tmp/usr/share/pixmaps/commiecc.png
+
+debian/tmp/usr/share/commiecc/master-plugins/*

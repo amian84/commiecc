@@ -1,0 +1,3 @@
+debian/tmp/usr/lib/python*/*/commiecc/common/*.py
+debian/tmp/usr/lib/python*/*/commiecc/*.py
+debian/tmp/usr/share/locale/*/LC_MESSAGES/*.mo

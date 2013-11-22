@@ -1,0 +1,16 @@
+CommieCC (Commie Classroom Controller)
+--------------------------------------
+
+CommieCC (stands for Commie Classroom Controller) helps to manage the common 
+tasks on a computer classroom: 
+
+* Discover computers
+* Lock/unlock screen
+* Close session, reboot and halt
+
+It provides a GUI for monitoring and managing the computers and has a 
+plugin-able architecture so the actions can be easily extended.
+
+--
+CommieCC is the legal property of J. Félix Ontañón <felixonta@gmail.com>
+Copyright (c) 2009 J. Félix Ontañón

@@ -1,0 +1,4 @@
+debian/tmp/usr/bin/commiecc-slave-desktop
+
+debian/tmp/usr/share/pixmaps/commiecc-slave-desktop.png
+debian/tmp/etc/xdg/autostart/commiecc-slave-desktop.desktop

@@ -1,0 +1,234 @@
+#!/usr/bin/python2.6
+# -*- coding: utf-8 -*-
+# vim: ts=4 
+###
+#
+# CommieCC is the legal property of J. Félix Ontañón <felixonta@gmail.com>
+# Copyright (c) 2009 J. Félix Ontañón
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3 as
+# published by the Free Software Foundation
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+###
+
+import os
+import avahi
+import dbus
+import dbus.mainloop.glib
+import logging
+import types
+
+from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
+from exceptions import Exception
+
+from commiecc.conf import SLAVE_DEFAULT_PLUGINS
+from commiecc.common import threaded
+from commiecc.slavelib import Dispatcher, CKController, NMController
+from commiecc.slavelib import SessionControl, ZeroconfService
+from commiecc.slavelib import init_plugin_system, get_plugins_by_capability
+from commiecc.slavelib.utils import setup_main_logger, LOG_MAIN
+from commiecc.slavelib.dbusmanager import DBusManager, COMMIECC_URI, \
+    COMMIECC_PATH, NOTIFIER_IFACE_URI
+
+
+import time
+
+SCREEN_LOCKER = 'commiecc-screen-locker'
+PORT = 8000
+
+DBUS_URI = 'org.freedesktop.DBus'
+DBUS_PATH = '/org/freedesktop/DBus'
+
+class CommieCCSlave():
+    def __init__(self):
+        self.publisher = None
+        self.dbus_controller = None
+        self.locking_status = False
+
+        self.logger = logging.getLogger(LOG_MAIN)
+        self.logger.debug(_('Slave started'))
+        
+        # Create server        
+        self.server = SimpleXMLRPCServer(("", PORT),
+                                    requestHandler=SimpleXMLRPCRequestHandler,
+                                    allow_none=True)
+        self.server.register_introspection_functions()
+
+        self.server.register_function(self.ping)
+              
+        # Perform DBus logic and register lock/unlock
+        bus = dbus.SystemBus()
+        
+        try:
+            dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+            name = dbus.service.BusName(COMMIECC_URI, bus)
+            self.dbus_controller = DBusManager(bus_name = name)
+            
+            self.server.register_function(self.dbus_controller.Lock, 
+                name='lock')
+            self.server.register_function(self.dbus_controller.Unlock, 
+                name='unlock')
+        except dbus.DBusException, e:
+            print 'Cant init dbus: %s' % e
+            self.logger.error(_('Cant init dbus: %s') % e)
+        
+        #TODO: Fix it for several active sessions
+        # Check for consolekit
+        dbus_interface = dbus.Interface(bus.get_object (DBUS_URI, DBUS_PATH), 
+            DBUS_URI)
+
+        if 'org.freedesktop.ConsoleKit' in dbus_interface.ListNames():
+            self.__wait_for_consolekit(['org.freedesktop.ConsoleKit'])
+        else:
+            bus.add_signal_receiver(self.__wait_for_consolekit,
+                dbus_interface=DBUS_URI, signal_name='NameOwnerChanged')
+            self.session_data = ('','','')
+            #self.logger.debug(_('act_sess: %s') % act_sess)
+
+        #TODO: Fix it for several active interfaces
+        self.active_iface = ('', '')
+        try:
+	    self.nmc = NMController()
+            act_iface = self.nmc.active_ifaces.items()
+            self.active_iface = len(act_iface) and act_iface[0] or ('', '')
+        except Exception, err:
+            # FIXME: better exception tracking
+            self.logger.debug(_('Error getting interfaces: %s') % str(err))
+              
+        # Sets up the rpc plugins
+        init_plugin_system(SLAVE_DEFAULT_PLUGINS)
+            
+        for plugin in [x for x in get_plugins_by_capability('rpc') \
+                if x.default_enabled]:
+            self.server.register_function(plugin.rpc, name=plugin.name)
+
+        for plugin in [x for x in get_plugins_by_capability('notify') \
+                if x.default_enabled]:
+            plugin.notify_func = self.dbus_controller.SendNotification
+
+        for plugin in [x for x in get_plugins_by_capability('screenlock') \
+                if x.default_enabled]:
+            plugin.lock_func = self.dbus_controller.Lock
+            plugin.unlock_func = self.dbus_controller.Unlock
+                       
+        # Perform publish/unpublish the service as local x11 sessions changes
+        Dispatcher.connect('connection_changed', self.__conn_changed)
+        Dispatcher.connect('locking_changed', self.__lock_changed)
+
+        self.launch_screen_locker(self.session_data[2])
+        self.publish()
+
+    def __wait_for_consolekit(self, names, *data):
+        if 'org.freedesktop.ConsoleKit' in names:
+            self.ckc = CKController()
+            act_sess = self.ckc.active_sessions.values()
+            self.session_data = len(act_sess) and act_sess[0] or ('','','')
+            self.logger.debug(_('act_sess: %s') % act_sess)
+            Dispatcher.connect('new_x11_session', self.__new_session)
+            Dispatcher.connect('losed_x11_session', self.__losed_session)
+
+            self.server.register_instance(SessionControl())
+            self.logger.debug(_('Registered sessioncontrol'))
+ 
+    def __new_session(self, dispatcher, *session_data):
+        self.launch_screen_locker(session_data[2])
+        self.session_data = session_data
+        self.publish()
+        
+    def __losed_session(self, dispatcher, *session_data):
+        self.unpublish()
+
+    def __conn_changed(self, dispatcher, interfaces):
+        self.active_iface = interfaces.items()[0]
+        
+        self.unpublish()
+        self.publish()
+
+    def __lock_changed(self, dispatcher, locking_status):
+        self.locking_status = locking_status
+
+    def ping(self):
+        if self.dbus_controller:
+            self.dbus_controller.Pinged()
+        # Retorna datos de sesion
+        return self.locking_status, self.session_data
+
+    def launch_screen_locker(self, display):
+        # Launch a new screen locker on current display
+        if self.dbus_controller:
+            # FIXME: better launching with subprocess module
+            os.system(SCREEN_LOCKER + " -d " + display)
+                    
+    def publish(self):
+        try:
+	    macs = ';'.join(NMController.get_all_macs())
+        except Exception, e:
+            macs = ''
+        # Publish the service via avahi
+        self.publisher = ZeroconfService(name='CommieCC Slave [%s]' % self.active_iface[1], 
+            port=PORT, stype='_xmlrpc._tcp', 
+            text=['Description=CommieCC Session Control Service',
+            'Interface=%s' % self.active_iface[0], 'HwAddr=%s' % self.active_iface[1], 
+            'MACS=%s' % macs,
+            'User=%s' % self.session_data[0], 'Login=%s' % self.session_data[1]])
+
+             
+        self.publisher.publish()
+        self.logger.debug(_('Published slave service via avahi'))
+
+    def unpublish(self):
+        try:
+            self.publisher.unpublish()
+            self.logger.debug(_('Unpublished slave service via avahi'))
+        except Exception, err:
+            # FIXME: better exception tracking
+            print 'Error unpublishing service %s', err
+            self.logger.error(_('Error unpublishing service %s'), err)
+            import sys
+            sys.exit(-1)
+            
+    def clean_quit(self):
+        if self.publisher:
+            self.unpublish()
+            
+        if self.dbus_controller:
+            self.dbus_controller.Stoped()
+        
+if __name__ == '__main__':
+    import sys
+    import gobject
+
+    # Runs the main logger
+    setup_main_logger()
+    logger = logging.getLogger(LOG_MAIN)    
+    # Run the server's main loop
+    @threaded
+    def start_server(server):
+        logger.info(_('Starting commiecc-slave xmlrpc service'))
+        server.serve_forever()
+
+    if os.path.exists(SCREEN_LOCKER):
+        SCREEN_LOCKER = './' + SCREEN_LOCKER
+
+    slave = CommieCCSlave()
+    
+    gobject.threads_init()
+    start_server(slave.server)
+
+    try:
+        gobject.MainLoop().run()
+    # FIXME: Catch other exceptions. The clean_quit needs to be mandatory.
+    except KeyboardInterrupt:
+        logger.info(_('Stoppig commiecc-slave xmlrpc service'))
+        slave.clean_quit()
+        sys.exit(0)

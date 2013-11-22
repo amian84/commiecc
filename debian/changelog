@@ -1,0 +1,412 @@
+commiecc (0.1-1ginfo45ggcloud11) precise; urgency=low
+
+  * New change branding data/img/commiecc-artwork400x400.png
+
+ -- Alexis Martín <amartin@emergya.com>  Thu, 24 Oct 2013 14:40:53 +0200
+
+commiecc (0.1-1ginfo45ggcloud10) precise; urgency=low
+
+  * Changed branding commie-screen-locker
+
+ -- Alexis Martín <amartin@emergya.com>  Wed, 23 Oct 2013 18:34:08 +0200
+
+commiecc (0.1-1ginfo45ggcloud9) precise; urgency=low
+
+  * Fix upstart script
+
+ -- damian <damian@ws-damian>  Wed, 11 Sep 2013 16:14:23 +0200
+
+commiecc (0.1-1ginfo45ggcloud8) precise; urgency=low
+
+  * Fixed issue when started before console-kit 
+
+ -- David Amian <damian@emergya.com>  Wed, 11 Sep 2013 15:53:53 +0200
+
+commiecc (0.1-1ginfo45ggcloud7) precise; urgency=low
+
+  * Fixed session time plugin
+  * Remove status bar from commie-screen-locker
+
+ -- David Amian <damian@emergya.com>  Fri, 06 Sep 2013 14:19:55 +0200
+
+commiecc (0.1-1ginfo45ggcloud6) precise; urgency=low
+
+  * Removed gdm depends
+
+ -- Alexis Martín <amartin@emergya.com>  Thu, 04 Jul 2013 14:58:00 +0200
+
+commiecc (0.1-1ginfo45ggcloud5) precise; urgency=low
+
+  * Fix upstart script
+
+ -- Alexis Martín <amartin@emergya.com>  Wed, 03 Jul 2013 15:50:14 +0200
+
+commiecc (0.1-1ginfo45ggcloud4) precise; urgency=low
+
+  * Fix script upstart
+
+ -- David Amian <damian@emergya.com>  Wed, 03 Jul 2013 11:26:34 +0200
+
+commiecc (0.1-1ginfo45ggcloud3) precise; urgency=low
+
+  * Modify sessioncontroller slave plugin 
+
+ -- David Amian <damian@emergya.com>  Mon, 01 Jul 2013 15:20:15 +0200
+
+commiecc (0.1-1ginfo45ggcloud2) precise; urgency=low
+
+  * Modify commiecc-slave to use pwd module to get user info instance of dbus
+  * Added avahi-utils as depends
+
+ -- David Amian <damian@emergya.com>  Wed, 26 Jun 2013 18:29:02 +0200
+
+commiecc (0.1-1ginfo45ggcloud1) precise; urgency=low
+
+  * Bumping version to ggcloud distro
+
+ -- David Amian <damian@emergya.com>  Tue, 25 Jun 2013 18:00:39 +0200
+
+commiecc (0.1-1ginfo45) karmic; urgency=low
+
+  * Fixed the way power-button-pressed was catch since it was launching
+    the session close dialog with another keys pulsation.
+
+ -- Roberto C. Morano <rcmorano@emergya.es>  Tue, 22 Mar 2011 09:27:11 +0200
+
+commiecc (0.1-1ginfo44) karmic; urgency=low
+
+  * Fixed import's pifia in screen-locker 
+  * When shutdown, reboot and logout from commie-class-control, 
+    get user from TV if slaves are not correctly published
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Fri, 22 Oct 2010 15:00:42 +0200
+
+commiecc (0.1-1ginfo43) karmic; urgency=low
+
+  * Adding user to the screen-locker shutdown's method
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Thu, 21 Oct 2010 20:25:34 +0200
+
+commiecc (0.1-1ginfo42) karmic; urgency=low
+
+  * Capturing power-button-pressed signal for a clean end of gnome session
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Thu, 21 Oct 2010 15:53:11 +0200
+
+commiecc (0.1-1ginfo41) karmic; urgency=low
+
+  * Fixbug for gdm end of sessions
+  * End of gnome sessions will be written directly to auth.log
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Thu, 21 Oct 2010 10:36:17 +0200
+
+commiecc (0.1-1ginfo40) karmic; urgency=low
+
+  * return to 0.1-1ginfo38 tag
+
+ -- Enrique Jiménez Campos <ejimenez@emergya.es>  Thu, 07 Oct 2010 10:42:22 +0200
+
+commiecc (0.1-1ginfo39) karmic; urgency=low
+
+  * Shutdowning the system without dbus method
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Tue, 05 Oct 2010 18:41:55 +0200
+
+commiecc (0.1-1ginfo38) karmic; urgency=low
+
+  * Fixing some 0.1-1ginfo37 bug
+
+ -- Enrique Jiménez Campos <ejimenez@emergya.es>  Fri, 02 Jul 2010 10:42:22 +0200
+
+commiecc (0.1-1ginfo37) karmic; urgency=low
+
+  * Consolekit and network manager exception catching
+  * Prevent for adding repeated slaves on classcontrol
+  * Do a ldap unbind after every ldap operation on master-side
+  * Added scrolling window to classcontrol gui
+
+ -- J. Félix Ontañón <fontanon@emergya.es>  Thu, 29 May 2010 10:39:11 +0200
+
+commiecc (0.1-1ginfo36) karmic; urgency=low
+
+  * Added manual unlock in screen-locker
+  * Added showing hostname at screen-locker 
+
+ -- David Teyssiere Rubio <dteyssiere@emergya.es>  Thu, 06 May 2010 10:42:22 +0200
+
+commiecc (0.1-1ginfo35) karmic; urgency=low
+
+  * fixin some poltergeist reboot loops in mac_conf plugin
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Wed, 28 Apr 2010 19:00:05 +0200
+
+commiecc (0.1-1ginfo34) karmic; urgency=low
+
+  * Removed 'Aula' tab and 'Editar' click menu
+
+ -- Andres Muñoz Vera <amunoz@emergya.es>  Mon, 26 Apr 2010 15:38:07 +0200
+
+commiecc (0.1-1ginfo33) karmic; urgency=low
+
+  *  Fixed some texts
+
+ -- David Teyssiere Rubio <dteyssiere@emergya.es>  Fri, 09 Apr 2010 11:12:49 +0200
+
+commiecc (0.1-1ginfo32) karmic; urgency=low
+
+  * Fixed popup menu when no clients selected.
+
+ -- David Teyssiere Rubio <dteyssiere@dteyssiere-laptop>  Thu, 08 Apr 2010 12:38:54 +0200
+
+commiecc (0.1-1ginfo31) karmic; urgency=low
+
+  * Fixed printer registration
+  * Fixed some texts for user information
+
+ -- David Teyssiere Rubio <dteyssiere@emergya.es>  Wed, 07 Apr 2010 18:32:13 +0200
+
+commiecc (0.1-1ginfo30) karmic; urgency=low
+
+  * Modified mac_conf.py for avoid live client restart
+
+ -- David Teyssiere Rubio <dteyssiere@emergya.es>  Mon, 05 Apr 2010 16:56:54 +0200
+
+commiecc (0.1-1ginfo29) karmic; urgency=low
+
+  * Added set_pass slave plugin to setup.py 
+
+ -- David Teyssiere Rubio <dteyssiere@emergya.es>  Thu, 25 Mar 2010 13:00:42 +0100
+
+commiecc (0.1-1ginfo28) karmic; urgency=low
+
+  * Commented notifications when discover unregistered machine 
+
+ -- David Teyssierer Rubio <dteyssiere@emergya.es>  Wed, 24 Mar 2010 17:02:41 +0100
+
+commiecc (0.1-1ginfo27) karmic; urgency=low
+
+  [Javier Hernández]
+  * Fixed time_session dialog text #22620
+  * Fixed notifications in mac_conf plugin #22592
+
+  [David Teyssiere]
+  * Added resolve printer MAC feature using arping
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Tue, 23 Mar 2010 15:33:35 +0100
+
+commiecc (0.1-1ginfo26) karmic; urgency=low
+
+  * Added slave plugin set_pass.py for set volunteer password
+
+ -- David Teyssiere Rubio <dteyssiere@emergya.es>  Thu, 18 Mar 2010 14:02:34 +0100
+
+commiecc (0.1-1ginfo25) karmic; urgency=low
+
+  * Deleted lending plugin packaged separated
+
+ -- David Teyssiere Rubio <dteyssiere@emergya.es>  Thu, 18 Mar 2010 14:00:34 +0100
+
+commiecc (0.1-1ginfo24) karmic; urgency=low
+
+  * Updated artwork.
+
+ -- Roberto C. Morano <rcmorano@emergya.es>  Mon, 08 Mar 2010 17:19:34 +0100
+
+commiecc (0.1-1ginfo23) karmic; urgency=low
+
+  * Updated artwork.
+
+ -- Roberto C. Morano <rcmorano@emergya.es>  Mon, 08 Mar 2010 15:13:23 +0100
+
+commiecc (0.1-1ginfo22) karmic; urgency=low
+
+  * bugfixing in ldap and mac_conf 
+
+ -- Adrian Belmonte Martin <abelmonte@emergya.es>  Thu, 04 Mar 2010 13:22:10 +0100
+
+commiecc (0.1-1ginfo21) karmic; urgency=low
+
+  * updating changelog
+
+ -- Adrian Belmonte Martin <abelmonte@emergya.es>  Thu, 25 Feb 2010 11:03:23 +0100
+
+commiecc (0.1-1ginfo20) karmic; urgency=low
+
+  * bugfixed in mac_conf
+  * Computer rebooting after renewal feature added
+
+ -- Adrian Belmonte Martin <abelmonte@emergya.es>  Thu, 25 Feb 2010 09:24:24 +0100
+
+commiecc (0.1-1ginfo20) karmic; urgency=low
+
+  * Some bugfixes in ldapmanager/mac_conf plugin
+  * Issue #20885 fixed
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Fri, 19 Feb 2010 12:08:22 +0100
+
+commiecc (0.1-1ginfo19) karmic; urgency=low
+
+  * All texts forced to be in Spanish
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Wed, 10 Feb 2010 19:10:41 +0100
+
+commiecc (0.1-1ginfo18) jaunty; urgency=low
+
+  * Printers register fixed
+  * Only one name for various MACS (same name for a computer)
+  * Printers discover fixed
+
+ -- Adrian <adrian@Jaunty>  Tue, 09 Feb 2010 18:28:13 +0100
+
+commiecc (0.1-1ginfo17) karmic; urgency=low
+
+  * Changes in MAC ldap registration
+  * Fixing Ldap problems
+
+ -- Adrian Belmonte Martin <abelmonte@emergya.es>  Mon, 08 Feb 2010 19:03:39 +0100
+
+commiecc (0.1-1ginfo16) karmic; urgency=low
+
+  [Javier Hernández]
+  * Added slave-side session time plugin
+  * Fixing some issues in master-side session time plugin
+  * Added commiecc-slave-desktop as depend
+
+  [J. Félix Ontañón]
+  * Changes in dbus's commiecc.conf
+  * Added new plugin type ScreenLockerPlugin
+  * Updated sess_time to derivate from ScreenLockerPlugin
+  * Slave loads ScreenLockerPlugin types
+
+  [Adrian Belmonte]
+  * Fixed some renewal bugs
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Thu, 04 Feb 2010 09:18:48 +0100
+
+commiecc (0.1-1ginfo15) karmic; urgency=low
+  
+  [Javier Hernández]
+  * Fixed some bugs
+  * Added master/session_time plugin
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Wed, 03 Feb 2010 20:16:38 +0100
+
+commiecc (0.1-1ginfo14) karmic; urgency=low
+
+  [Javier Hernández]
+  * Fixed dbus issues, now client can get locked itself at startup
+  * Added message and detacher plugins to python package
+  [Adrian Belmonte]
+  * Fixed renewal bugs
+  * Better LDAP interaction
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Wed, 03 Feb 2010 12:10:02 +0100
+
+commiecc (0.1-1ginfo13) karmic; urgency=low
+  
+  [Javier Hernández]
+  * Fixed some issues
+  * Removed dummy menu-entries in messager-plugin
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Mon, 01 Feb 2010 13:42:59 +0100
+
+commiecc (0.1-1ginfo12) karmic; urgency=low
+
+  [Javier Hernández]
+  * Merged with launchpad latest source code, revision 42
+  * Added messaging and notification capabilities   
+  * Force DATA_DIR to /usr
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Tue, 26 Jan 2010 10:37:59 +0100
+
+commiecc (0.1-1ginfo11) karmic; urgency=low
+
+  * Fixed upstart script.
+
+ -- Luis Rivas Vañó <lrivas@emergya.es>  Thu, 14 Jan 2010 12:11:07 +0100
+
+commiecc (0.1-1ginfo10) karmic; urgency=low
+  
+  [Javier Hernández]
+  * Merged with launchpad latest source code, revision 28
+  * Added a network status icon on screen locker
+  * Better plugin error managing
+  * Slave returns screen locking state on ping
+  * Added a gconf key to save user size preferences
+  * Translations' support
+
+ -- Javier Hernández Antúnez <jhernandez@emergya.es>  Tue, 12 Jan 2010 11:55:02 +0100
+
+commiecc (0.1-1ginfo9) karmic; urgency=low
+
+  [J. Félix Ontañón]
+  * Added first version of printer registration
+  * New version of ldapmanager added
+
+ -- Luis Rivas Vañó <lrivas@emergya.es>  Tue, 23 Dec 2009 16:19:15 +0100
+
+commiecc (0.1-1ginfo8) karmic; urgency=low
+
+  * Only allow root to run commie-class-control
+
+ -- Luis Rivas Vañó <lrivas@emergya.es>  Tue, 22 Dec 2009 19:13:48 +0100
+
+commiecc (0.1-1ginfo7) karmic; urgency=low
+
+  [ J. Félix Ontañón ]
+  * Edit and remove added to mac_conf
+
+ -- Luis Rivas Vañó <lrivas@emergya.es>  Tue, 22 Dec 2009 19:00:12 +0100
+
+commiecc (0.1-1ginfo6) karmic; urgency=low
+
+  [ J. Félix Ontañón ]
+  * Artwork Guadalinfo applied
+  * New ldapmanager version added
+  * Dependency python-ldap added
+  * Printers discovered by mac_conf plugin
+
+ -- Luis Rivas Vañó <lrivas@emergya.es>  Tue, 22 Dec 2009 16:24:21 +0100
+
+commiecc (0.1-1ginfo5) karmic; urgency=low
+
+  [ J. Félix Ontañón ]
+  * Moved old example plugins to doc/
+  * The mac_conf master and slave side are installed
+
+ -- Luis Rivas Vañó <lrivas@emergya.es>  Tue, 22 Dec 2009 14:37:14 +0100
+
+commiecc (0.1-1ginfo4) karmic; urgency=low
+
+  [ J. Félix Ontañón ]
+  * Added master and slave side mac_conf plugins.
+  * Bugfixes on slave first active net iface detection.
+  * Better exception managing on classcontrol plugin system.
+
+ -- Luis Rivas Vañó <lrivas@emergya.es>  Fri, 18 Dec 2009 12:48:37 +0100
+
+commiecc (0.1-1ginfo3) karmic; urgency=low
+
+  * Added menu entry for commie-class-control.
+  * Modified upstart script.
+
+ -- Luis Rivas Vañó <lrivas@emergya.es>  Fri, 18 Dec 2009 12:48:37 +0100
+
+commiecc (0.1-1ginfo2) karmic; urgency=low
+
+  [ J. Félix Ontañón ]
+  * Bugfixes on CKController
+
+ -- Luis Rivas Vañó <lrivas@emergya.es>  Wed, 16 Dec 2009 13:37:15 +0100
+
+commiecc (0.1-1ginfo1) karmic; urgency=low
+
+  * Updates upstart script.
+
+ -- Luis Rivas Vañó <lrivas@emergya.es>  Mon, 14 Dec 2009 16:23:37 +0100
+
+commiecc (0.1-1) karmic; urgency=low
+
+  * Initial release
+
+ -- J. Félix Ontañón <felixonta@gmail.com>  Fri, 04 Dec 2009 09:27:30 +0100

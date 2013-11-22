@@ -1,0 +1,13 @@
+debian/tmp/usr/lib/python*/*/commiecc/slavelib/*.py
+
+debian/tmp/usr/bin/commiecc-slave
+debian/tmp/usr/bin/commiecc-screen-locker
+
+debian/tmp/usr/share/commiecc/data/lock_screen.ui
+debian/tmp/usr/share/commiecc/data/img/commiecc-artwork400x400.png
+
+debian/tmp/usr/share/gdm/autostart/LoginWindow/commiecc-screen-locker.desktop
+
+debian/tmp/etc/dbus-1/system.d/commiecc.conf
+
+debian/tmp/usr/share/commiecc/slave-plugins/*

@@ -1,0 +1,239 @@
+# Spanish translation of commiecc.
+# Copyright (C) 2009 J. Félix Ontañón
+# This file is distributed under the same license as the commiecc package.
+# J. Félix Ontañón <felixonta@gmail.com>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-01-24 14:24+0100\n"
+"PO-Revision-Date: 2010-01-24 14:45+0000\n"
+"Last-Translator: J. Félix Ontañón <Unknown>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2010-01-25 04:52+0000\n"
+"X-Generator: Launchpad (build Unknown)\n"
+
+#: ../slave-plugins/example.py:62
+msgid "Message received from master"
+msgstr "Mensaje recibido"
+
+#: ../master-plugins/examplemenu.py:84
+msgid "Hello slave!"
+msgstr "¡Hola esclavo!"
+
+#: ../data/lock_screen.ui:53
+msgid "Screen Locked. Consult the admin."
+msgstr "Pantalla bloqueada. Consulte al administrador."
+
+#: ../data/lock_screen.ui:81
+msgid "Master connectivity"
+msgstr "Conectividad con maestro"
+
+#: ../data/lock_screen.ui:107
+msgid "Unlock screen"
+msgstr "Desbloquear"
+
+#: ../data/lock_screen.ui:122
+msgid "Shutdown Computer"
+msgstr "Apagar"
+
+#: ../data/lock_screen.ui:167
+msgid ""
+"You need to specify an user account with\n"
+"special permissions to acomplish this action"
+msgstr ""
+"Necesita especificar una cuenta de usuario con\n"
+"permisos especiales para realizar esta acción"
+
+#: ../data/lock_screen.ui:190
+msgid "Username:"
+msgstr "Usuario:"
+
+#: ../data/lock_screen.ui:197
+msgid "Password:"
+msgstr "Clave:"
+
+#: ../data/lock_screen.ui:277 ../data/classcontrol.ui:349
+msgid "Details"
+msgstr "Detalles"
+
+#: ../data/lock_screen.ui:337 ../data/lock_screen.ui:350
+msgid "button"
+msgstr "botón"
+
+#: ../data/classcontrol.ui:27
+msgid "CommieCC"
+msgstr "CommieCC"
+
+#: ../data/classcontrol.ui:42
+msgid "Lock all"
+msgstr "Bloquear todos"
+
+#: ../data/classcontrol.ui:55
+msgid "Unlock all"
+msgstr "Desbloquear todos"
+
+#: ../data/classcontrol.ui:77 ../data/classcontrol.ui:1276
+msgid "Logout all"
+msgstr "Cierre sesion todos"
+
+#: ../data/classcontrol.ui:99
+msgid "Preferences"
+msgstr "Preferencias"
+
+#: ../data/classcontrol.ui:113 ../data/classcontrol.ui:1199
+#: ../data/classcontrol.ui:1200
+msgid "Quit"
+msgstr "Salir"
+
+#: ../data/classcontrol.ui:134
+msgid "About"
+msgstr "Acerca de"
+
+#: ../data/classcontrol.ui:169
+msgid "Link"
+msgstr "Enlace"
+
+#: ../data/classcontrol.ui:185
+msgid "Host"
+msgstr "Host"
+
+#: ../data/classcontrol.ui:201
+msgid "IP"
+msgstr "IP"
+
+#: ../data/classcontrol.ui:217
+msgid "User"
+msgstr "Usuario"
+
+#: ../data/classcontrol.ui:233
+msgid "Screen"
+msgstr "Pantalla"
+
+#: ../data/classcontrol.ui:249
+msgid "Time"
+msgstr "Tiempo"
+
+#: ../data/classcontrol.ui:267
+msgid "List"
+msgstr "Listado"
+
+#: ../data/classcontrol.ui:306
+msgid "Classroom"
+msgstr "Clase"
+
+#: ../data/classcontrol.ui:380
+msgid "Lock"
+msgstr "Bloquear"
+
+#: ../data/classcontrol.ui:390
+msgid "Unlock"
+msgstr "Desbloquear"
+
+#: ../data/classcontrol.ui:405
+msgid "Logout"
+msgstr "Cierre de sesión"
+
+#: ../data/classcontrol.ui:415
+msgid "Reboot"
+msgstr "Reiniciar"
+
+#: ../data/classcontrol.ui:425
+msgid "Shutdown"
+msgstr "Apagar"
+
+#: ../data/classcontrol.ui:449
+msgid "About CommieCC"
+msgstr "Acerca de CommieCC"
+
+#: ../data/classcontrol.ui:456
+msgid "(C) 2009 J. Félix Ontañón <felixonta@gmail.com>"
+msgstr "(C) 2009 J. Félix Ontañón <felixonta@gmail.com>"
+
+#: ../data/classcontrol.ui:457
+msgid "A slave-master application for managing a computer classroom"
+msgstr "Aplicación maestro-esclavo para el control de un aula de ordenadores"
+
+#: ../data/classcontrol.ui:1162 ../data/classcontrol.ui:1283
+msgid "Reboot all"
+msgstr "Reiniciar todos"
+
+#: ../data/classcontrol.ui:1172 ../data/classcontrol.ui:1289
+msgid "Shutdown all"
+msgstr "Apagar todos"
+
+#: ../data/classcontrol.ui:1201
+msgid "Quit the program"
+msgstr "Sale de la aplicación"
+
+#: ../data/classcontrol.ui:1206
+msgid "Lock all screens"
+msgstr "Desbloquear pantallas"
+
+#: ../data/classcontrol.ui:1207
+msgid "Lock All"
+msgstr "Bloquear todos"
+
+#: ../data/classcontrol.ui:1208
+msgid "Lock the screen for all computers"
+msgstr "Bloquea la pantalla de todos los equipos"
+
+#: ../data/classcontrol.ui:1213
+msgid "Unlock all screens"
+msgstr "Desbloquear pantallas"
+
+#: ../data/classcontrol.ui:1214
+msgid "Unlock All"
+msgstr "Desbloquear todos"
+
+#: ../data/classcontrol.ui:1215
+msgid "Unlock the screen for all computers"
+msgstr "Desbloquea la pantalla de todos los equipos"
+
+#: ../data/classcontrol.ui:1275
+msgid "Logout all computers"
+msgstr "Cierre sesion todos"
+
+#: ../data/classcontrol.ui:1277
+msgid "Logout the current session of all computers"
+msgstr "Cierra la sesión actual de todos los equipos"
+
+#: ../data/classcontrol.ui:1282 ../data/classcontrol.ui:1284
+msgid "Reboot all computers"
+msgstr "Reiniciar todos"
+
+#: ../data/classcontrol.ui:1288
+msgid "Shutdown all computers"
+msgstr "Apagar todos"
+
+#: ../data/classcontrol.ui:1290
+msgid "Perform shutdown on all computers"
+msgstr "Realiza el apagado de todos los equipos"
+
+#: ../master-plugins/messagemenu.ui:31
+msgid "Say hello!"
+msgstr "¡Di hola!"
+
+#: ../master-plugins/messagemenu.ui:33
+msgid "Say hello to selected slaves"
+msgstr "Dice hola a los esclavos seleccionados"
+
+#: ../master-plugins/messagemenu.ui:42
+msgid "Custom message"
+msgstr "Mensaje personalizado"
+
+#: ../master-plugins/messagemenu.ui:44
+msgid "Send a custom message to selected slaves"
+msgstr "Envía un mensaje personalizado a los esclavos seleccionados"
+
+#: ../master-plugins/messagemenu.ui:76
+msgid "Set the message"
+msgstr "Escribe el mensaje"
+
+#: ../master-plugins/messagemenu.ui:77
+msgid "What message do you want to send the slaves?"
+msgstr "¿Qué mensaje quieres enviar al/los cliente/s ?"

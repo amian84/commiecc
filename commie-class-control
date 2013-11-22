@@ -1,0 +1,381 @@
+#!/usr/bin/python2.6
+# -*- coding: utf-8 -*-
+# vim: ts=4 
+###
+#
+# CommieCC is the legal property of J. Félix Ontañón <felixonta@gmail.com>
+# Copyright (c) 2009 J. Félix Ontañón
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3 as
+# published by the Free Software Foundation
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+###
+
+import sys
+import os
+import gtk
+import gobject
+import gconf
+import time
+import logging
+import mx.DateTime
+from mx.DateTime.Parser import DateTimeFromString
+
+from commiecc.common import Notificator, threaded
+from commiecc.conf import DATA_DIR, MASTER_DEFAULT_PLUGINS
+from commiecc.masterlib import Slave, Master, Dispatcher
+import commiecc.masterlib.timeout_xmlrpclib as xmlrpclib
+
+from commiecc.classcontrol import TextBufferHandler, TEXTBUFFER_LOGGER 
+from commiecc.classcontrol import SlaveUIState, do_work, RPC_TIMEOUT
+from commiecc.classcontrol import init_plugin_system, get_plugins_by_capability
+
+COMPUTER_COL, NAME_COL, ADDRESS_COL, USER_COL, \
+SCREEN_COL, TIME_COL, SLAVE_COL = range(7)
+
+UI_FILE = os.path.join(DATA_DIR, 'data/classcontrol.ui')
+
+LOG_LEVEL = logging.DEBUG
+LOG_FORMAT = '%(asctime)s %(levelname)s - %(message)s'
+LOG_DATE_FORMAT = '%H:%M:%S'
+
+PING_TIME = 1
+REFRESH_TIME = 60
+TIME_FORMAT = '%H:%M'
+
+GCONF_PATH = '/apps/commie-class-control'
+
+gobject.threads_init()
+
+# Load icons
+theme = gtk.icon_theme_get_default()
+
+wired_icon = theme.load_icon('network-wired', 24, 0)
+wireless_icon = theme.load_icon('network-wireless', 24, 0)
+lock_screen_icon = theme.load_icon('system-lock-screen', 24, 0)
+unlock_screen_icon = theme.load_icon('computer', 24, 0)
+
+class CommieStatusIcon(gtk.StatusIcon):
+    def __init__(self):
+        gtk.StatusIcon.__init__(self)
+
+        # Get the widgets
+        builder = gtk.Builder()
+        if not builder.add_from_file(UI_FILE):
+            raise 'Cant load %s' % UI_FILE
+
+        self.status_menu = builder.get_object('status_menu')
+   
+        # Load ClassroomControl
+        self.classroom = ClassroomControl(builder)
+        
+        # Setup status icon
+        self.set_from_file(os.path.join(DATA_DIR,  
+            'data/img/commiecc-c-logo-bg64x64.png'))
+            
+        self.connect('popup-menu', self.__icon_popupmenu_cb, None)
+        self.connect('activate', self.__activate_cb)
+ 
+        self.set_visible(True)
+ 
+    def __icon_popupmenu_cb(self, status_icon, button, activate_time, data):
+        self.status_menu.popup(None, None, gtk.status_icon_position_menu,
+            button, activate_time, status_icon)
+        
+    def __activate_cb(self, status_icon):
+        if self.classroom.main_window.get_properties('visible')[0]:
+            self.classroom.main_window.hide()
+        else:
+            self.classroom.main_window.show()
+
+ClassControlNotificator = Notificator('CommieCC', 'commiecc')
+
+class ClassroomControl:
+    def __init__(self, builder):
+        builder.connect_signals(self)
+
+        self.slaves = {}
+        self.master = Master()
+
+        self.model = builder.get_object('class_store')
+        self.main_window = builder.get_object('main_window')
+        self.notebook = builder.get_object('notebook')
+        self.actions_menu = builder.get_object('actions_menu')
+        self.list_tv = builder.get_object('list_tv')
+        self.log_buffer = builder.get_object('log_buffer')
+        self.about_dlg = builder.get_object('about_dlg')
+
+        self.list_tv.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+        self.about_dlg.connect("response", lambda d, r: d.hide())
+
+        # Sets gconf preferences
+        client = gconf.client_get_default()
+        client.add_dir(GCONF_PATH, gconf.CLIENT_PRELOAD_NONE)
+        self.width = client.get_int(GCONF_PATH + '/window_width')
+        self.height = client.get_int(GCONF_PATH + '/window_height')
+        self.main_window.resize(self.width, self.height)
+
+        
+        # Connect to signals
+        def catch_window_size(widget, allocate):
+            self.width = allocate.width
+            self.height = allocate.height
+
+        self.main_window.connect('size_allocate', catch_window_size)
+
+        Dispatcher.connect('slave_discovered', self.add_slave)
+        Dispatcher.connect('slave_losed', self.remove_slave)
+        Dispatcher.connect('slave_alive', self.alive_slave)
+        Dispatcher.connect('slave_dead', self.dead_slave)             
+        
+        # Sets up the plugins
+        init_plugin_system(MASTER_DEFAULT_PLUGINS)
+
+        for plugin in [x for x in get_plugins_by_capability('slaves_getter') \
+                if x.default_enabled]:
+            plugin.get_slaves = self.get_selected_slaves
+            
+        for plugin in [x for x in get_plugins_by_capability('tab') \
+                if x.default_enabled]:
+            self.notebook.append_page(plugin.toplevel_widget, 
+                gtk.Label(plugin.name))
+
+        for plugin in [x for x in get_plugins_by_capability('submenu') \
+                if x.default_enabled]:
+            self.actions_menu.append(plugin.submenu)
+
+        for plugin in [x for x in get_plugins_by_capability('menuitems') \
+                if x.default_enabled]:
+            for item in plugin.menuitems:
+                if item.parent:
+                    item.reparent(self.actions_menu)
+                else:
+                    self.actions_menu.append(item)
+            for plugin in [x for x in get_plugins_by_capability('notify') \
+                    if x.default_enabled]:
+                plugin.notify_func = ClassControlNotificator.display_notification
+
+        # Sets up the logger
+        self.logger = logging.getLogger(TEXTBUFFER_LOGGER)
+        self.logger.setLevel(LOG_LEVEL)
+        handler = TextBufferHandler(self.log_buffer)
+        handler.setFormatter(logging.Formatter(LOG_FORMAT, 
+            datefmt=LOG_DATE_FORMAT))
+        self.logger.addHandler(handler)
+        
+## dirty user/time report bugfix, now user/time comes with ping and
+## this refresh action has no sense
+#
+#        gobject.timeout_add(REFRESH_TIME * 1000, self.refresh)
+#
+#    def refresh(self):
+#        for item in self.model:
+#            current = DateTimeFromString(item[TIME_COL])
+#            delta = mx.DateTime.Time(0,0,REFRESH_TIME)
+#            item[TIME_COL] = (current + delta).strftime(TIME_FORMAT)
+#            
+#        return True
+#
+                            
+    def add_slave(self, dispatcher, slave):
+        for managed_slave in self.model:
+            if hash(slave) == managed_slave[SLAVE_COL]:
+                return
+
+        creation_time = DateTimeFromString(slave.login)
+        now = DateTimeFromString(time.strftime("%Y-%m-%d %H:%M:%S", 
+            time.gmtime()))
+        login_time = now - creation_time
+
+        self.model.append([wired_icon, slave.host, slave.address, slave.user, 
+            lock_screen_icon, login_time.strftime(TIME_FORMAT), hash(slave)])
+        self.logger.info(_('Slave discovered %s %s') % (slave.host, slave.address))
+
+        self.slaves[slave] = SlaveUIState()
+        self.ping_slave(slave, self.slaves[slave].alive_evt)
+
+    def remove_slave(self, dispatcher, slave):
+        for item in self.model:
+            if item[SLAVE_COL] == hash(slave):
+                self.model.remove(item.iter)
+                slave_ui_state = self.slaves.pop(slave)
+                slave_ui_state.alive_evt.set()
+        self.logger.info(_('Slave disconnected %s %s') % (slave.host, 
+            slave.address))
+        
+    def alive_slave(self, dispatcher, slave):
+        for item in self.model:
+            if item[SLAVE_COL] == hash(slave):
+                self.slaves[slave].status = SlaveUIState.ST_ALIVE                
+                item[COMPUTER_COL] = wired_icon
+        self.logger.warning(_('Slave recovered connection %s %s') % (slave.host,
+            slave.address))
+        
+    def dead_slave(self, dispatcher, slave):
+        for item in self.model:
+            if item[SLAVE_COL] == hash(slave):
+                self.slaves[slave].status = SlaveUIState.ST_DEAD
+                item[COMPUTER_COL] = wireless_icon
+        self.logger.warning(_('Slave losed connection %s %s') % (slave.host, 
+            slave.address))
+       
+    @threaded
+    def ping_slave(self, slave, event):
+        def do_ping(slave, alive):
+            server = xmlrpclib.ServerProxy("http://%s:%s" % (slave.host, 
+                    slave.port), timeout=RPC_TIMEOUT)
+                    
+            try:
+                locked, session_data = server.ping()
+                self.__update_slave(slave, locked, session_data)
+                if not alive:
+                    Dispatcher.emit('slave_alive', slave)    
+                    return True
+            except Exception, err:
+                self.logger.debug(_('Ping failed %s %s') % (slave.host, slave.address))
+                if alive:
+                    Dispatcher.emit('slave_dead', slave)
+                    return False
+                    
+            return alive
+
+        #The alive local var prevents for trigger same signal several times            
+        alive = True
+        while not event.is_set():
+            time.sleep(PING_TIME)
+            alive = do_ping(slave, alive)
+
+    def __update_slave(self, slave, status, session_data):
+        for item in self.model:
+            if item[SLAVE_COL] == hash(slave):
+                if status:
+                    item[SCREEN_COL] = lock_screen_icon
+                else:
+                    item[SCREEN_COL] = unlock_screen_icon
+                # Update slave data at each ping
+                item[USER_COL] = session_data[0]
+                creation_time = DateTimeFromString(session_data[1])
+                now = DateTimeFromString(time.strftime("%Y-%m-%d %H:%M:%S",
+                    time.gmtime()))
+                login_time = now - creation_time
+                item[TIME_COL] = login_time.strftime(TIME_FORMAT)
+
+    def list_tv_button_press_event_cb(self, list_tv, event):
+        if list_tv.get_selection().count_selected_rows() > 0:
+            if event.button == 3:
+                self.actions_menu.popup(None, None, None, event.button, 
+                        event.time)
+                return True
+
+    def get_selected_slaves(self):
+        selection = self.list_tv.get_selection()
+        model, selected_rows = selection.get_selected_rows()
+        selected_slaves = []
+        for slave, slaveuistate in self.slaves.items():
+            if not selected_rows: break
+            for row in selected_rows:
+                if hash(slave) == model[row][SLAVE_COL]:
+                    selected_slaves.append((slave, slaveuistate))
+                    selected_rows.remove(row)
+            
+        return tuple(selected_slaves)
+
+    def lock_menuitem_activate_cb(self, menuitem, data=None):       
+        slaves = self.get_selected_slaves()
+        for slave, slaveuistate in slaves:
+            if slaveuistate.status == SlaveUIState.ST_ALIVE:
+                do_work('lock', slave.host, slave.port)
+                self.logger.debug(_('Lock sended to %s') % slave.host)
+
+    def unlock_menuitem_activate_cb(self, menuitem, data=None):
+        slaves = self.get_selected_slaves()
+        for slave, slaveuistate in slaves:
+            if slaveuistate.status == SlaveUIState.ST_ALIVE:
+                do_work('unlock', slave.host, slave.port)
+                self.logger.debug(_('Unlock sended to %s') % slave.host)
+
+    def logout_menuitem_activate_cb(self, menuitem, data=None):
+        slaves = self.get_selected_slaves()
+        for slave, slaveuistate in slaves:
+            if slaveuistate.status == SlaveUIState.ST_ALIVE:
+                if not slave.user: slave.user = self._getUserFromTv(slave)
+                do_work('logout', slave.host, slave.port, [slave.user])
+                self.logger.debug(_('Logout sended to %s') % slave.host)
+
+    def reboot_menuitem_activate_cb(self, menuitem, data=None):
+        slaves = self.get_selected_slaves()
+        for slave, slaveuistate in slaves:
+            if slaveuistate.status == SlaveUIState.ST_ALIVE:
+                if not slave.user: slave.user = self._getUserFromTv(slave)
+                do_work('reboot', slave.host, slave.port, [slave.user])
+                self.logger.debug(_('Reboot sended to %s') % slave.host)
+       
+    def shutdown_menuitem_activate_cb(self, menuitem, data=None):
+        slaves = self.get_selected_slaves()
+        for slave, slaveuistate in slaves:
+            if slaveuistate.status == SlaveUIState.ST_ALIVE:
+                if not slave.user: slave.user = self._getUserFromTv(slave)
+                do_work('shutdown', slave.host, slave.port, [slave.user])
+                self.logger.debug(_('Shutdown sended to %s') % slave.host)
+
+    def lockall_cb(self, data=None):
+        for slave in self.slaves.keys():
+            do_work('lock', slave.host, slave.port)
+            self.logger.debug(_('Lock sended to %s') % slave.host)
+                        
+    def unlockall_cb(self, data=None):
+        for slave in self.slaves.keys():
+            do_work('unlock', slave.host, slave.port)
+            self.logger.debug(_('Unlock sended to %s') % slave.host)
+
+    def logoutall_cb(self, data=None):
+        for slave in self.slaves.keys():
+            if not slave.user: slave.user = self._getUserFromTv(slave)
+            do_work('logout', slave.host, slave.port, [slave.user])
+            self.logger.debug(_('Shutdown sended to %s') % slave.host)
+
+    def rebootall_cb(self, data=None):
+        for slave in self.slaves.keys():
+            if not slave.user: slave.user = self._getUserFromTv(slave)
+            do_work('reboot', slave.host, slave.port, [slave.user])
+            self.logger.debug(_('Reboot sended to %s') % slave.host)
+       
+    def shutdownall_cb(self, data=None):
+        for slave in self.slaves.keys():
+            if not slave.user: slave.user = self._getUserFromTv(slave)
+            do_work('shutdown', slave.host, slave.port, [slave.user])
+            self.logger.debug(_('Shutdown sended to %s') % slave.host)
+    
+    def pref_toolbtn_clicked_cb(self, data=None):
+        pass
+
+    def about_toolbtn_clicked_cb(self, data=None):
+        self.about_dlg.show()
+        
+    def gtk_main_quit(self, data=None):
+        client = gconf.client_get_default()
+        client.set_int(GCONF_PATH + '/window_width', self.width)
+        client.set_int(GCONF_PATH + '/window_height', self.height)
+        gtk.main_quit()
+
+    def _getUserFromTv(self, slave):
+        for item in self.model:
+            if item[SLAVE_COL] == hash(slave):
+                return item[USER_COL]
+        
+if __name__ == '__main__':
+    import os
+    import sys
+
+    wewe = CommieStatusIcon()
+    gtk.main()
